@@ -292,6 +292,7 @@ def generate_custom():
         data = request.get_json() or {}
         options = data.get('options', [])
         count = min(data.get('count', 1), 50)  # Limit to 50 selections
+        technique = data.get('technique', 'fpga')
         
         if not options or len(options) == 0:
             return jsonify({'error': 'No options provided'}), 400
@@ -307,7 +308,7 @@ def generate_custom():
         # Calculate bytes needed for uniform distribution
         bytes_per_selection = 4  # Use 4 bytes per selection
         total_bytes = count * bytes_per_selection
-        random_bytes = fpga_sim.generate_random_bytes(total_bytes)
+        random_bytes, gen_metadata = get_random_bytes(total_bytes, technique)
         
         results = []
         for i in range(count):
@@ -322,17 +323,21 @@ def generate_custom():
         generation_time = time.time() - start_time
         
         # Record performance
-        perf_monitor.record_generation(total_bytes, generation_time, 'fpga')
+        perf_monitor.record_generation(total_bytes, generation_time, technique)
+        
+        # Combine metadata
+        metadata = {
+            'count': count,
+            'type': 'custom',
+            'options_count': len(options),
+            'generation_time_ms': round(generation_time * 1000, 2),
+            'timestamp': datetime.utcnow().isoformat(),
+            **gen_metadata
+        }
         
         return jsonify({
             'results': results,
-            'metadata': {
-                'count': count,
-                'type': 'custom',
-                'options_count': len(options),
-                'generation_time_ms': round(generation_time * 1000, 2),
-                'timestamp': datetime.utcnow().isoformat()
-            }
+            'metadata': metadata
         })
         
     except Exception as e:

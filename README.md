@@ -156,14 +156,3 @@ QuantumRandomGeneratorDashboard/
 - Statistical randomness validation
 - High-entropy output guaranteed
 
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Run tests and ensure quality
-5. Submit a pull request
-
-## License
-
-[Add your license information here]
